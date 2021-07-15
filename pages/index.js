@@ -22,14 +22,49 @@ function ProfileSidebar(props){
   )
 }
 
+function ProfileRelationsBox(props) {
+  return (
+    <ProfileRelationsBoxWrapper>
+      <h2 className="smallTitle">
+        {props.title} ({props.items.length})
+      </h2>
+      <ul>
+        {/* {seguidores.map((itemAtual) => {
+          return (
+            <li key={itemAtual}>
+              <a href={`https://github.com/${itemAtual}.png`}>
+                <img src={itemAtual.image} />
+                <span>{itemAtual.title}</span>
+              </a>
+            </li>
+          )
+        })} */}
+      </ul>
+    </ProfileRelationsBoxWrapper>
+  )
+}
+
 export default function Home() {
   const [communities, setCommunities] = React.useState([{
     id: 0,
     title: 'Eu odeio acordar cedo',
     image: 'https://alurakut.vercel.app/capa-comunidade-01.jpg',
   }]);
-  const githubUser = 'sylvn001'
+  const [followers, setFollowers] = React.useState([]);
+
   const favoritePeoples = ['danielhe4rt','peas', 'riccihenrique', 'ecsbjunior', 'rxngui', 'ing01']
+  const githubUser = 'sylvn001'
+
+  React.useEffect(function() {
+    fetch('https://api.github.com/users/sylvn001/followers')
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function(responseFormated) {
+      setFollowers(responseFormated);
+    })
+  }, [])
+
   return (
     <>
       <AlurakutMenu/>
@@ -85,6 +120,7 @@ export default function Home() {
           </Box>
         </div>
         <div className="profileRelationsArea" style={{ gridArea: 'profileRelationsArea'}}>
+        <ProfileRelationsBox title="Seguidores" items={followers}/>
         <ProfileRelationsBoxWrapper>
           <ul>
             {communities.map((item) => {
@@ -101,15 +137,15 @@ export default function Home() {
           </ProfileRelationsBoxWrapper>
           <ProfileRelationsBoxWrapper>
             <h2 className="smallTitle">
-              Pessoas da comunidade ({favoritePeoples.length})
+            Pessoas da comunidade ({favoritePeoples.length})
             </h2>
             <ul>
-              {favoritePeoples.map((item) => {
+              {favoritePeoples.map((favitem) => {
                 return (
-                  <li key={item}>
-                    <a href={`/users/${item}`} >
-                      <img src={`https://github.com/${item}.png`} />
-                      <span>{item}</span>
+                  <li key={favitem}>
+                    <a href={`/users/${favitem}`}>
+                      <img src={`https://github.com/${favitem}.png`} />
+                      <span>{favitem}</span>
                     </a>
                   </li>
                 )
