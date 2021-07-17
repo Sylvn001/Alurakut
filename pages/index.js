@@ -45,15 +45,17 @@ function ProfileRelationsBox(props) {
 }
 
 export default function Home() {
+  const githubUser = 'sylvn001'
+  const favoritePeoples = ['danielhe4rt','peas', 'riccihenrique', 'ecsbjunior', 'rxngui', 'ing01']
+
   const [communities, setCommunities] = React.useState([{
     id: 0,
     title: 'Eu odeio acordar cedo',
     image: 'https://alurakut.vercel.app/capa-comunidade-01.jpg',
+    creatorlug: githubUser,
   }]);
   const [followers, setFollowers] = React.useState([]);
 
-  const favoritePeoples = ['danielhe4rt','peas', 'riccihenrique', 'ecsbjunior', 'rxngui', 'ing01']
-  const githubUser = 'sylvn001'
 
   React.useEffect(function() {
     fetch('https://api.github.com/users/sylvn001/followers')
@@ -63,6 +65,31 @@ export default function Home() {
     .then(function(responseFormated) {
       setFollowers(responseFormated);
     })
+
+    //API GraphQL
+    fetch('https://graphql.datocms.com/', {
+      method: 'POST',
+      headers: {
+        'Authorization': '4ebe0c1d63ce80bb54188f885f9b86',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({ "query": `query {
+        allCommunities {
+          id
+          title
+          image
+          creatorslug
+        }
+      }` })
+    })
+    .then((response) => response.json()) // Pega o retorno do response.json() e já retorna
+    .then((fullResponse) => {
+      const responseData = fullResponse.data.allCommunities;
+      console.log(responseData)
+      setCommunities(responseData)
+    })
+
   }, [])
 
   return (
@@ -89,13 +116,26 @@ export default function Home() {
               console.log(formData.get('image'));
 
               const comunity = {
-                id: new Date().toISOString(),
                 title: formData.get('title'),
                 image: formData.get('image'),
+                creatorslug: githubUser,
               }
 
-              const updateCommunities = [...communities, comunity]
-              setCommunities(updateCommunities)
+              fetch('/api/communities', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(comunity)
+              })
+              .then(async (response) => {
+                const data = await response.json();
+                console.log("JSON RESPONSE: ", data.CommunityData);
+
+                const comunity = data.CommunityData;
+                const updateCommunities = [...communities, comunity]
+                setCommunities(updateCommunities)
+              })
             }}>
               <div>
                 <input
